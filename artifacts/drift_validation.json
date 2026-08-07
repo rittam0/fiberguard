@@ -1,0 +1,58 @@
+{
+  "name": "C5 representative replay and controlled drift validation",
+  "representative_sample": {
+    "source": "held-out final-test lightpaths from the publisher test file",
+    "training_or_threshold_tuning_use": false,
+    "rows": 4560,
+    "lightpaths": 114,
+    "class_counts": {
+      "healthy/no-failure": 1140,
+      "ECL": 1140,
+      "EDFA": 1140,
+      "NLI": 1140
+    },
+    "selection": "10 fixed evenly spaced observations from each of four ordered condition blocks for every final-test lightpath",
+    "sequence_order_preserved": true
+  },
+  "base_drift_result": {
+    "method": "PSI with 10 training-quantile bins",
+    "reference": "C2 training-lightpath rows",
+    "window": "bounded held-out historical telemetry replay",
+    "window_rows": 4560,
+    "warning_threshold": 0.2,
+    "per_feature": {
+      "LP length (km)": 0.10447909942556452,
+      "Laser current (mA)": 1.7291864187836012,
+      "LP power (dBm)": 2.7243337534153182,
+      "OSNR (dB)": 0.32076725623321184,
+      "BER (dB)": 0.3207671907938781
+    },
+    "status": "warning"
+  },
+  "controlled_drift_injection": {
+    "name": "CONTROLLED DRIFT INJECTION",
+    "feature": "LP power (dBm)",
+    "description": "Added a deterministic +2.0 dBm to optical power on a copy of every representative replay row; labels were unchanged.",
+    "labels_modified": false,
+    "result": {
+      "method": "PSI with 10 training-quantile bins",
+      "reference": "C2 training-lightpath rows",
+      "window": "bounded held-out historical telemetry replay",
+      "window_rows": 4560,
+      "warning_threshold": 0.2,
+      "per_feature": {
+        "LP length (km)": 0.10447909942556452,
+        "Laser current (mA)": 1.7291864187836012,
+        "LP power (dBm)": 9.777087244444349,
+        "OSNR (dB)": 0.32076725623321184,
+        "BER (dB)": 0.3207671907938781
+      },
+      "status": "warning"
+    },
+    "feature_psi_before": 2.7243337534153182,
+    "feature_psi_after": 9.777087244444349,
+    "feature_psi_increase": 7.052753491029031,
+    "materially_higher": true
+  },
+  "conclusion": "The representative held-out replay provides the lower-drift baseline; the controlled +2.0 dBm optical-power shift increases that feature's PSI from 2.724334 to 9.777087 and triggers the configured warning."
+}

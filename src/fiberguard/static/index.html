@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FiberGuard — Network Failure Intelligence</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08131b;
+      --panel: #10222d;
+      --panel-soft: #0c1b24;
+      --line: #27404d;
+      --text: #edf7f7;
+      --muted: #91a8b1;
+      --teal: #42dbc1;
+      --orange: #ffb45b;
+      --red: #ff7f78;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 86% 5%, rgba(66, 219, 193, .12), transparent 30rem),
+        linear-gradient(145deg, #071118, var(--bg) 55%, #0a1820);
+      color: var(--text);
+      font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .shell { width: min(1160px, calc(100% - 36px)); margin: 0 auto; padding: 32px 0 48px; }
+    header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+    .eyebrow { color: var(--teal); font-size: 12px; font-weight: 800; letter-spacing: .18em; }
+    h1 { margin: 2px 0 0; font-size: clamp(32px, 5vw, 58px); line-height: 1; letter-spacing: -.05em; }
+    .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 17px; }
+    .status-line { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; background: rgba(16, 34, 45, .85); padding: 7px 11px; color: var(--muted); font-size: 12px; }
+    .pill strong { color: var(--text); }
+    .dot { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--orange); }
+    .dot.ok { background: var(--teal); box-shadow: 0 0 12px rgba(66,219,193,.7); }
+    .grid { display: grid; grid-template-columns: 1.45fr .85fr; gap: 18px; }
+    .panel { border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(160deg, rgba(16,34,45,.97), rgba(10,25,34,.97)); box-shadow: 0 20px 45px rgba(0,0,0,.18); }
+    .hero { min-height: 320px; padding: 26px; display: flex; flex-direction: column; }
+    .panel-label { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .result { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: end; margin: 28px 0 auto; }
+    .state { margin: 0 0 8px; color: var(--teal); font-size: 15px; font-weight: 750; }
+    .state.degrading { color: var(--orange); }
+    .fault { margin: 0; max-width: 680px; font-size: clamp(30px, 4.5vw, 52px); line-height: 1.03; letter-spacing: -.04em; }
+    .confidence { min-width: 132px; text-align: right; }
+    .confidence strong { display: block; font-size: 35px; line-height: 1; }
+    .confidence span { color: var(--muted); font-size: 12px; }
+    .decision-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 22px; border-top: 1px solid var(--line); }
+    .decision { border-radius: 7px; padding: 7px 10px; background: rgba(66,219,193,.1); color: var(--teal); font: 800 12px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; }
+    .decision.review { background: rgba(255,180,91,.1); color: var(--orange); }
+    .latency { color: var(--muted); font-size: 13px; }
+    .side { padding: 24px; }
+    .side h2, .measurements h2, .safety h2 { margin: 5px 0 8px; font-size: 20px; letter-spacing: -.02em; }
+    .side p { color: var(--muted); margin: 0 0 22px; }
+    button { width: 100%; border: 0; border-radius: 10px; background: var(--teal); color: #062019; padding: 13px 16px; cursor: pointer; font: inherit; font-weight: 850; transition: transform .15s, filter .15s; }
+    button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    button:disabled { cursor: wait; opacity: .6; transform: none; }
+    .replay-meta { margin-top: 15px; color: var(--muted); font-size: 12px; }
+    .replay-meta strong { color: var(--text); }
+    .measurements { grid-column: 1 / -1; padding: 24px 26px; }
+    table { width: 100%; margin-top: 16px; border-collapse: collapse; }
+    th, td { padding: 12px 8px; text-align: left; border-top: 1px solid var(--line); }
+    th { color: var(--muted); font-size: 12px; font-weight: 650; }
+    td { font: 700 15px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .safety { grid-column: 1 / -1; display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 14px; padding: 19px 24px; align-items: center; }
+    .metric { padding-left: 18px; border-left: 1px solid var(--line); }
+    .metric span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+    .metric strong { display: block; margin-top: 3px; font-size: 15px; }
+    .warning { color: var(--orange); }
+    footer { margin-top: 18px; color: var(--muted); font-size: 12px; }
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 24px, 1160px); padding-top: 22px; }
+      header, .result { align-items: flex-start; flex-direction: column; }
+      .status-line { justify-content: flex-start; }
+      .grid { grid-template-columns: 1fr; }
+      .confidence { text-align: left; }
+      .measurements { overflow-x: auto; }
+      .safety { grid-template-columns: 1fr; }
+      .metric { padding: 10px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <div class="eyebrow">FIBERGUARD</div>
+        <h1>Network Failure Intelligence</h1>
+        <p class="subtitle">Fast, review-aware classification of optical-network telemetry.</p>
+      </div>
+      <div class="status-line" aria-label="Model status">
+        <div class="pill"><span class="dot" id="health-dot"></span>Service <strong id="health">Checking</strong></div>
+        <div class="pill">Model <strong id="header-version">—</strong></div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="panel hero" aria-live="polite">
+        <div class="panel-label">Current evaluated observation</div>
+        <div class="result">
+          <div>
+            <p class="state" id="state">Ready for replay</p>
+            <h2 class="fault" id="fault">Load a held-out example</h2>
+          </div>
+          <div class="confidence"><strong id="confidence">—</strong><span>confidence</span></div>
+        </div>
+        <div class="decision-row">
+          <span class="decision" id="decision">AWAITING INPUT</span>
+          <span class="latency">Inference latency <strong id="latency">—</strong></span>
+        </div>
+      </article>
+
+      <aside class="panel side">
+        <div class="panel-label">Historical telemetry replay</div>
+        <h2>See the decision loop</h2>
+        <p>Replay a small sequence of published, held-out observations through the registered model.</p>
+        <button id="replay-button" type="button">Start historical replay</button>
+        <div class="replay-meta">Observation <strong id="position">0 / 0</strong> · Historical data only</div>
+      </aside>
+
+      <section class="panel measurements">
+        <div class="panel-label">Incoming measurements</div>
+        <h2>Optical telemetry</h2>
+        <table>
+          <thead><tr><th>Link length</th><th>Laser current</th><th>Optical power</th><th>Signal quality (OSNR)</th><th>Bit error rate (BER)</th></tr></thead>
+          <tbody><tr><td id="length">— km</td><td id="laser">— mA</td><td id="power">— dBm</td><td id="osnr">— dB</td><td id="ber">— dB</td></tr></tbody>
+        </table>
+      </section>
+
+      <section class="panel safety">
+        <div><div class="panel-label">Model safety</div><h2>Guardrails at a glance</h2></div>
+        <div class="metric"><span>Review threshold</span><strong>0.99 confidence</strong></div>
+        <div class="metric"><span>Drift status</span><strong id="drift">Checking</strong></div>
+        <div class="metric"><span>Model version</span><strong id="safety-version">—</strong></div>
+      </section>
+    </section>
+    <footer>This operator view simulates operational consumption of a published benchmark. It is not connected to a live ISP or carrier network.</footer>
+  </main>
+
+  <script>
+    const names = {
+      "healthy/no-failure": "Healthy",
+      "ECL": "Laser degradation (ECL)",
+      "EDFA": "Amplifier degradation (EDFA)",
+      "NLI": "Nonlinear impairment (NLI)"
+    };
+    const byId = (id) => document.getElementById(id);
+    const fmt = (value, digits = 2) => Number(value).toFixed(digits);
+
+    async function initialize() {
+      try {
+        const [healthResponse, driftResponse] = await Promise.all([fetch("/health"), fetch("/drift")]);
+        if (!healthResponse.ok || !driftResponse.ok) throw new Error("status request failed");
+        const health = await healthResponse.json();
+        const drift = await driftResponse.json();
+        byId("health").textContent = "Healthy";
+        byId("health-dot").classList.add("ok");
+        byId("header-version").textContent = `v${health.model_version}`;
+        byId("safety-version").textContent = `${health.model} v${health.model_version}`;
+        byId("drift").textContent = drift.status === "stable" ? "Stable" : "Warning";
+        byId("drift").classList.toggle("warning", drift.status !== "stable");
+      } catch (error) {
+        byId("health").textContent = "Unavailable";
+        byId("drift").textContent = "Unavailable";
+        byId("drift").classList.add("warning");
+      }
+    }
+
+    function showInput(input) {
+      byId("length").textContent = `${fmt(input.lp_length_km, 0)} km`;
+      byId("laser").textContent = `${fmt(input.laser_current_ma, 2)} mA`;
+      byId("power").textContent = `${fmt(input.lp_power_dbm, 2)} dBm`;
+      byId("osnr").textContent = `${fmt(input.osnr_db, 2)} dB`;
+      byId("ber").textContent = `${fmt(input.ber_db, 2)} dB`;
+    }
+
+    function showPrediction(prediction) {
+      const healthy = prediction.predicted_state === "healthy/no-failure";
+      byId("state").textContent = healthy ? "Healthy" : "Degrading";
+      byId("state").classList.toggle("degrading", !healthy);
+      byId("fault").textContent = names[prediction.predicted_state] || prediction.predicted_state;
+      byId("confidence").textContent = `${fmt(prediction.confidence * 100, 1)}%`;
+      byId("decision").textContent = prediction.decision === "confident" ? "CONFIDENT" : "NEEDS REVIEW";
+      byId("decision").classList.toggle("review", prediction.decision !== "confident");
+      byId("latency").textContent = `${fmt(prediction.latency_ms, 2)} ms`;
+    }
+
+    async function runReplay() {
+      const button = byId("replay-button");
+      button.disabled = true;
+      button.textContent = "Loading held-out replay…";
+      try {
+        const response = await fetch("/replay/example");
+        if (!response.ok) throw new Error("replay request failed");
+        const {records} = await response.json();
+        for (let index = 0; index < records.length; index += 1) {
+          const record = records[index];
+          showInput(record.input);
+          const predictionResponse = await fetch("/predict", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(record.input)
+          });
+          if (!predictionResponse.ok) throw new Error("prediction request failed");
+          showPrediction(await predictionResponse.json());
+          byId("position").textContent = `${index + 1} / ${records.length}`;
+          if (index < records.length - 1) await new Promise((resolve) => setTimeout(resolve, 650));
+        }
+        button.textContent = "Replay again";
+      } catch (error) {
+        button.textContent = "Replay unavailable — try again";
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    byId("replay-button").addEventListener("click", runReplay);
+    initialize();
+  </script>
+</body>
+</html>

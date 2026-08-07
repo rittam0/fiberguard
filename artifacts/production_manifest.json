@@ -1,0 +1,35 @@
+{
+  "model_name": "fiberguard-fault-classifier",
+  "model_version": "1",
+  "run_id": "b44575b76591469ca24534a3f52159d4",
+  "mlflow_tracking_uri": "sqlite:////home/khrit/projects/fiberguard/artifacts/mlflow.db",
+  "registered_model_uri": "models:/fiberguard-fault-classifier/1",
+  "model_artifact_uri": "runs:/b44575b76591469ca24534a3f52159d4/model",
+  "local_model_artifact": "/home/khrit/projects/fiberguard/artifacts/mlflow-artifacts/models/m-73adf73987054d5e9da5afd5d5e6238d/artifacts",
+  "features": [
+    "LP length (km)",
+    "Laser current (mA)",
+    "LP power (dBm)",
+    "OSNR (dB)",
+    "BER (dB)"
+  ],
+  "raw_review_threshold": 0.99,
+  "review_threshold_source": "C2 validation rows, raw XGBoost maximum probabilities only",
+  "threshold_validation_evidence": {
+    "threshold": 0.99,
+    "review_rate": 0.02350049164208456,
+    "wrong_flagged": 1057,
+    "error_capture_rate": 0.7593390804597702,
+    "correct_flagged": 8503,
+    "selection_rule": "minimum review rate capturing >= 75% of validation errors, capped at 5%; fallback maximizes capture under cap",
+    "validation_total_errors": 1392
+  },
+  "tracked_metrics": {
+    "validation_macro_f1": 0.9965788383483771,
+    "final_test_macro_f1": 0.9969600113974991,
+    "final_test_log_loss": 0.01031294371932745,
+    "final_test_brier_score": 0.004794073149906548,
+    "training_duration_seconds": 30.350466393007082
+  },
+  "model_info_uri": "models:/m-73adf73987054d5e9da5afd5d5e6238d"
+}

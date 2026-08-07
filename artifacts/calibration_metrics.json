@@ -1,0 +1,56 @@
+{
+  "method": "sigmoid via CalibratedClassifierCV(FrozenEstimator), fitted on validation only",
+  "uncalibrated": {
+    "validation": {
+      "accuracy": 0.9965781710914454,
+      "macro_f1": 0.9965788383483771,
+      "log_loss": 0.011624615639448166,
+      "multiclass_brier_score": 0.0052363707350611775,
+      "ece_15_bin": 0.00044281729584016836
+    },
+    "final_test": {
+      "accuracy": 0.9969590643274854,
+      "macro_f1": 0.9969600113974991,
+      "log_loss": 0.01031294371932745,
+      "multiclass_brier_score": 0.004794073149906548,
+      "ece_15_bin": 0.0012539396060314483
+    }
+  },
+  "calibrated": {
+    "validation": {
+      "accuracy": 0.9966912487708948,
+      "macro_f1": 0.9966918260558766,
+      "log_loss": 0.015754953735526003,
+      "multiclass_brier_score": 0.005900242384185722,
+      "ece_15_bin": 0.0006784600545507207
+    },
+    "final_test": {
+      "accuracy": 0.9967763157894737,
+      "macro_f1": 0.9967772238313097,
+      "log_loss": 0.014512952969740043,
+      "multiclass_brier_score": 0.005472140802691705,
+      "ece_15_bin": 0.0006461682605777756
+    }
+  },
+  "threshold_selection": {
+    "threshold": 0.99,
+    "review_rate": 0.005211406096361848,
+    "wrong_flagged": 747,
+    "error_capture_rate": 0.5549777117384844,
+    "correct_flagged": 1373,
+    "selection_rule": "minimum review rate capturing >= 75% of validation errors, capped at 5%; fallback maximizes capture under cap",
+    "validation_total_errors": 1346
+  },
+  "final_test_abstention": {
+    "threshold": 0.99,
+    "review_rate": 0.005248538011695906,
+    "review_count": 718,
+    "confident_count": 136082,
+    "confident_accuracy": 0.9987213591804941,
+    "confident_macro_f1": 0.9987165214485854,
+    "total_wrong_predictions": 441,
+    "wrong_predictions_flagged": 267,
+    "correct_predictions_flagged": 451,
+    "remaining_wrong_confident_predictions": 174
+  }
+}

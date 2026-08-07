@@ -1,0 +1,448 @@
+{
+  "files": {
+    "train": {
+      "path": "data/raw/Optical network soft failure dataset/Lightpath_756_label_4_QoT_dataset_train_900.txt",
+      "size_bytes": 235467003
+    },
+    "test": {
+      "path": "data/raw/Optical network soft failure dataset/Lightpath_756_label_4_QoT_dataset_test_300.txt",
+      "size_bytes": 78350139
+    }
+  },
+  "rows": {
+    "train": 2721600,
+    "test": 907200
+  },
+  "columns": {
+    "count": 7,
+    "names": [
+      "Time stamp",
+      "LP length (km)",
+      "Laser current (mA)",
+      "LP power (dBm)",
+      "OSNR (dB)",
+      "BER (dB)",
+      "Failure type"
+    ],
+    "delimiter": "whitespace",
+    "header": true,
+    "metadata_lines_before_header": 1
+  },
+  "schema": {
+    "dtypes": {
+      "Time stamp": "int64",
+      "LP length (km)": "float64",
+      "Laser current (mA)": "float64",
+      "LP power (dBm)": "float64",
+      "OSNR (dB)": "float64",
+      "BER (dB)": "float64",
+      "Failure type": "int64"
+    },
+    "telemetry_columns": [
+      "LP length (km)",
+      "Laser current (mA)",
+      "LP power (dBm)",
+      "OSNR (dB)",
+      "BER (dB)"
+    ],
+    "target_column": "Failure type"
+  },
+  "label_encoding": {
+    "column": "Failure type",
+    "storage": "integer",
+    "mapping": {
+      "0": "healthy/no-failure",
+      "1": "ECL",
+      "2": "EDFA",
+      "3": "NLI"
+    },
+    "source": "failure_description = \"'0' : No failure, '1' : ECL failure, '2' : EDFA failure, '3' : NLI failure\""
+  },
+  "entity_encoding": {
+    "lightpath_id_explicit": false,
+    "evidence": "No entity-ID column exists. LP length repeats (only 1,440 distinct length-label keys across 3,024 blocks) and is not a unique identifier."
+  },
+  "order_encoding": {
+    "timestamp_explicit": true,
+    "column": "Time stamp",
+    "scope": "within-block sample index; not a global timestamp",
+    "likely_block_structure": "756 ordered lightpaths, each represented by four consecutive condition blocks in label order 0,1,2,3; each train block has 900 rows and each test block 300 rows",
+    "identity_status": "The four-block grouping and correspondence between train/test are implied solely by row order.",
+    "evidence_by_file": {
+      "train": {
+        "timestamp_resets": 3023,
+        "reset_transitions": {
+          "900->1": 3023
+        },
+        "timestamp_step_counts": {
+          "-899": 3023,
+          "1": 2718576
+        },
+        "contiguous_length_label_run_lengths": {
+          "900": 3024
+        },
+        "contiguous_runs": 3024,
+        "distinct_length_label_keys": 1440
+      },
+      "test": {
+        "timestamp_resets": 3023,
+        "reset_transitions": {
+          "300->1": 3023
+        },
+        "timestamp_step_counts": {
+          "-299": 3023,
+          "1": 904176
+        },
+        "contiguous_length_label_run_lengths": {
+          "300": 3024
+        },
+        "contiguous_runs": 3024,
+        "distinct_length_label_keys": 1440
+      }
+    }
+  },
+  "class_distribution": {
+    "train": {
+      "0": 680400,
+      "1": 680400,
+      "2": 680400,
+      "3": 680400
+    },
+    "test": {
+      "0": 226800,
+      "1": 226800,
+      "2": 226800,
+      "3": 226800
+    }
+  },
+  "numeric_summary": {
+    "train": {
+      "Time stamp": {
+        "min": 1,
+        "max": 900,
+        "mean": 450.4999999999971,
+        "std_population": 259.8074607602124
+      },
+      "LP length (km)": {
+        "min": 218.0,
+        "max": 5051.0,
+        "mean": 1982.7248677248629,
+        "std_population": 993.4760995016917
+      },
+      "Laser current (mA)": {
+        "min": 40.04556321902268,
+        "max": 415.9755681351835,
+        "mean": 48.72973736751804,
+        "std_population": 12.55160949581412
+      },
+      "LP power (dBm)": {
+        "min": -13.065141948416404,
+        "max": 6.840307795240177,
+        "mean": -1.1572024458580366,
+        "std_population": 3.0029402818824837
+      },
+      "OSNR (dB)": {
+        "min": 5.679129862719133,
+        "max": 28.40422898479183,
+        "mean": 18.001442449391636,
+        "std_population": 3.20655572325977
+      },
+      "BER (dB)": {
+        "min": -603.5721952838336,
+        "max": -9.40367671097455,
+        "mean": -82.08013288062642,
+        "std_population": 64.97535115802519
+      },
+      "Failure type": {
+        "min": 0,
+        "max": 3,
+        "mean": 1.4999999999999725,
+        "std_population": 1.1180339887499
+      }
+    },
+    "test": {
+      "Time stamp": {
+        "min": 1,
+        "max": 300,
+        "mean": 150.49999999999588,
+        "std_population": 86.6020592518823
+      },
+      "LP length (km)": {
+        "min": 218.0,
+        "max": 5051.0,
+        "mean": 1982.724867724861,
+        "std_population": 993.4760995016761
+      },
+      "Laser current (mA)": {
+        "min": 40.05642135763473,
+        "max": 70.22046507706925,
+        "mean": 44.93514364665532,
+        "std_population": 7.286662100697204
+      },
+      "LP power (dBm)": {
+        "min": -3.702590710809008,
+        "max": 4.002355801737814,
+        "mean": -1.0276715047485345,
+        "std_population": 1.9439876883820162
+      },
+      "OSNR (dB)": {
+        "min": 11.417435462823182,
+        "max": 28.40200865845004,
+        "mean": 18.84562418398544,
+        "std_population": 2.687639644386469
+      },
+      "BER (dB)": {
+        "min": -603.2708599675994,
+        "max": -20.00478313062738,
+        "mean": -92.14739243792995,
+        "std_population": 66.4834069186274
+      },
+      "Failure type": {
+        "min": 0,
+        "max": 3,
+        "mean": 1.4999999999999936,
+        "std_population": 1.1180339887498534
+      }
+    }
+  },
+  "missing_values": {
+    "train": {
+      "Time stamp": 0,
+      "LP length (km)": 0,
+      "Laser current (mA)": 0,
+      "LP power (dBm)": 0,
+      "OSNR (dB)": 0,
+      "BER (dB)": 0,
+      "Failure type": 0
+    },
+    "test": {
+      "Time stamp": 0,
+      "LP length (km)": 0,
+      "Laser current (mA)": 0,
+      "LP power (dBm)": 0,
+      "OSNR (dB)": 0,
+      "BER (dB)": 0,
+      "Failure type": 0
+    }
+  },
+  "nonfinite_values": {
+    "train": {
+      "Time stamp": 0,
+      "LP length (km)": 0,
+      "Laser current (mA)": 0,
+      "LP power (dBm)": 0,
+      "OSNR (dB)": 0,
+      "BER (dB)": 0,
+      "Failure type": 0
+    },
+    "test": {
+      "Time stamp": 0,
+      "LP length (km)": 0,
+      "Laser current (mA)": 0,
+      "LP power (dBm)": 0,
+      "OSNR (dB)": 0,
+      "BER (dB)": 0,
+      "Failure type": 0
+    }
+  },
+  "duplicate_rows": {
+    "train": 0,
+    "test": 0
+  },
+  "assumptions": [
+    "A future reconstruction would have to assume each timestamp reset starts a new lightpath-condition block.",
+    "It would have to assume publisher row ordering is stable and complete within every block.",
+    "It would have to assume blocks can be associated across the four labels and train/test splits; the raw files do not encode that association."
+  ],
+  "warnings": [
+    "Do not use LP length as lightpath identity: it is a measurement and may not be unique.",
+    "Time stamp is a within-block sample index, not an absolute time value.",
+    "Any inferred entity identity is vulnerable to row reordering, missing blocks, or undocumented publisher ordering."
+  ],
+  "first_10_rows": {
+    "train": [
+      [
+        1,
+        514.0,
+        40.10937578796846,
+        -2.001130865643141,
+        24.74643842219495,
+        -267.3813693396357,
+        0
+      ],
+      [
+        2,
+        514.0,
+        40.09673606499123,
+        -2.0057857708501303,
+        24.744103922904973,
+        -267.244248875547,
+        0
+      ],
+      [
+        3,
+        514.0,
+        40.10869317038231,
+        -2.001021212474521,
+        24.74649333974208,
+        -267.3845958877176,
+        0
+      ],
+      [
+        4,
+        514.0,
+        40.113158948400354,
+        -1.9942113765628768,
+        24.749897127462035,
+        -267.5846562262617,
+        0
+      ],
+      [
+        5,
+        514.0,
+        40.09154133303483,
+        -1.998598825815574,
+        24.747705660706657,
+        -267.45583319037723,
+        0
+      ],
+      [
+        6,
+        514.0,
+        40.09695230838111,
+        -1.994620830051062,
+        24.749692846091985,
+        -267.5726450388954,
+        0
+      ],
+      [
+        7,
+        514.0,
+        40.09668546569697,
+        -2.0115783665996374,
+        24.741190178777934,
+        -267.0732080860683,
+        0
+      ],
+      [
+        8,
+        514.0,
+        40.096686571964206,
+        -2.000377058849452,
+        24.746815881118987,
+        -267.4035468454563,
+        0
+      ],
+      [
+        9,
+        514.0,
+        40.111899261437976,
+        -2.007362505710057,
+        24.743311758833364,
+        -267.1977364894203,
+        0
+      ],
+      [
+        10,
+        514.0,
+        40.10307258390844,
+        -2.004269155836452,
+        24.74486520950602,
+        -267.28895620177303,
+        0
+      ]
+    ],
+    "test": [
+      [
+        1,
+        514.0,
+        40.0865721008112,
+        -1.9858653471321184,
+        24.75405051573308,
+        -267.82898567731434,
+        0
+      ],
+      [
+        2,
+        514.0,
+        40.09526001336679,
+        -1.9896458859211363,
+        24.752171630017266,
+        -267.71842863070265,
+        0
+      ],
+      [
+        3,
+        514.0,
+        40.12573481498571,
+        -2.0020222074132685,
+        24.74599188368416,
+        -267.35513554808074,
+        0
+      ],
+      [
+        4,
+        514.0,
+        40.12011959430492,
+        -2.007662808419046,
+        24.74316080358228,
+        -267.1888740162077,
+        0
+      ],
+      [
+        5,
+        514.0,
+        40.09683382293903,
+        -1.9989315476905312,
+        24.74753924488258,
+        -267.44605324712813,
+        0
+      ],
+      [
+        6,
+        514.0,
+        40.10272417439473,
+        -2.0045686927336392,
+        24.74471490497866,
+        -267.2801288004764,
+        0
+      ],
+      [
+        7,
+        514.0,
+        40.09294625331604,
+        -2.003027792358621,
+        24.7454878383568,
+        -267.3255264895024,
+        0
+      ],
+      [
+        8,
+        514.0,
+        40.088103825014514,
+        -2.000369306612259,
+        24.74681976210202,
+        -267.4037748815841,
+        0
+      ],
+      [
+        9,
+        514.0,
+        40.11008329181417,
+        -2.0073383968691987,
+        24.74332387667129,
+        -267.1984479321356,
+        0
+      ],
+      [
+        10,
+        514.0,
+        40.10016692405206,
+        -2.002631869623999,
+        24.74568632767022,
+        -267.33718591048387,
+        0
+      ]
+    ]
+  }
+}
