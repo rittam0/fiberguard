@@ -2,10 +2,9 @@
   "model_name": "fiberguard-fault-classifier",
   "model_version": "1",
   "run_id": "b44575b76591469ca24534a3f52159d4",
-  "mlflow_tracking_uri": "sqlite:////home/khrit/projects/fiberguard/artifacts/mlflow.db",
   "registered_model_uri": "models:/fiberguard-fault-classifier/1",
   "model_artifact_uri": "runs:/b44575b76591469ca24534a3f52159d4/model",
-  "local_model_artifact": "/home/khrit/projects/fiberguard/artifacts/mlflow-artifacts/models/m-73adf73987054d5e9da5afd5d5e6238d/artifacts",
+  "local_model_artifact": "artifacts/mlflow-artifacts/models/m-73adf73987054d5e9da5afd5d5e6238d/artifacts",
   "features": [
     "LP length (km)",
     "Laser current (mA)",
@@ -31,5 +30,6 @@
     "final_test_brier_score": 0.004794073149906548,
     "training_duration_seconds": 30.350466393007082
   },
-  "model_info_uri": "models:/m-73adf73987054d5e9da5afd5d5e6238d"
+  "model_info_uri": "models:/m-73adf73987054d5e9da5afd5d5e6238d",
+  "mlflow_tracking_path": "artifacts/mlflow.db"
 }
