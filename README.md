@@ -1,18 +1,14 @@
 # FiberGuard
 
-### Production ML for Network Reliability
+### Optical fault classification with a served, monitored model
 
-FiberGuard demonstrates how an ML system could help network operators identify soft degradation in optical connections, determine the likely fault, and route ambiguous predictions for review rather than blindly automating every decision.
+FiberGuard classifies optical-network degradation from five telemetry measurements. The [audited benchmark](artifacts/data_audit.json) contains 3,628,800 observations across 756 reconstructed lightpaths; XGBoost achieves 99.70% final-test macro-F1 with whole entities held apart. Raw predictions below the validation-selected 0.99 confidence threshold go to human review. FastAPI serves an MLflow-versioned model, with historical replay and PSI drift monitoring.
 
 > **Scope:** FiberGuard is trained and evaluated on a published optical-network telemetry benchmark. Its replay → prediction → review → drift loop simulates operational consumption and is not connected to a live carrier network.
 
 ![FiberGuard operator view](docs/operator-view.png)
 
 *The dependency-free operator view replays held-out historical telemetry; it does not display live carrier traffic.*
-
-| **3.6M** | **756** | **99.70%** | **≈61%** |
-|:--|:--|:--|:--|
-| telemetry observations | inferred fiber links | macro-F1 on held-out links | model errors captured while reviewing ≈0.52% of cases |
 
 ## How it works
 
@@ -31,7 +27,7 @@ Five measurements—link length, laser current, optical power, signal quality, a
 
 ## Why the result is trustworthy
 
-The raw benchmark does not contain a lightpath ID. FiberGuard reconstructs identity from the publisher's ordered four-condition blocks, validates that structure across all 756 lightpaths, and then splits whole lightpaths. No reconstructed lightpath appears in more than one of training, validation, or final test. This avoids the optimistic leakage that would result from randomly mixing correlated telemetry rows.
+The raw benchmark does not contain a lightpath ID. FiberGuard reconstructs identity from the publisher's ordered four-condition blocks, validates that structure across all 756 lightpaths, and then splits whole lightpaths. Identity depends on the publisher's stable row ordering; there is no independently verified entity-ID column. No reconstructed lightpath appears in more than one of training, validation, or final test. This avoids the optimistic leakage that would result from randomly mixing correlated telemetry rows.
 
 | Evidence | Held-out result |
 |:--|--:|
@@ -41,9 +37,9 @@ The raw benchmark does not contain a lightpath ID. FiberGuard reconstructs ident
 | XGBoost log loss | **0.010313** |
 | XGBoost multiclass Brier score | **0.004794** |
 
-The baseline progression shows that the task is learnable with conventional models and that XGBoost adds measurable value. Deep learning was not needed.
+Sources: [baseline evaluation](artifacts/baseline_metrics.json), [production probability metrics](artifacts/production_manifest.json), and [split manifest](artifacts/split_manifest.json). The selected split uses 1,904,400 training rows, 406,800 validation rows, and 136,800 final-test rows (114 held-out lightpaths); the 3.6M figure describes the full audited dataset. The baseline progression shows that the task is learnable with conventional models and that XGBoost adds measurable value. Deep learning was not needed.
 
-Reliability was evaluated rather than assumed. Sigmoid calibration was fitted on validation data and rejected because it worsened log loss and Brier score, so the shipped model keeps raw XGBoost probabilities. The 0.99 review threshold was also selected on validation data only. On the untouched final test, it routed about 0.52% of cases to review, captured 267 of 441 model errors, and left confident predictions at about 99.87% accuracy. These are evaluation results, not a formal coverage guarantee.
+Reliability was evaluated rather than assumed. Sigmoid calibration was fitted on validation data and rejected because it worsened log loss and Brier score, so the shipped model keeps raw XGBoost probabilities. The 0.99 review threshold was also selected on validation data only. For the shipped raw model, [validation evidence](artifacts/production_manifest.json) records 2.35005% routed to review and 1,057 of 1,392 errors captured (75.9339%). These are threshold-selection validation results. The 0.52485% review / 267-of-441 final-test result in [calibration metrics](artifacts/calibration_metrics.json) belongs to the rejected sigmoid experiment. A full final-test review result for the shipped raw model has not been persisted; it cannot be inferred from that experiment.
 
 Feature ablation checks whether one convenient signal explains the score:
 
@@ -53,24 +49,17 @@ Feature ablation checks whether one convenient signal explains the score:
 | Without laser current | 0.746982 |
 | Without optical power | 0.868202 |
 
-No single feature reproduced full performance; the classifier depends on complementary telemetry signals.
+[Feature ablation](artifacts/feature_ablation.json) shows no single feature reproduced full performance. Removing length, OSNR, or BER barely changed the score; laser current and optical power contribute most. Ablation is diagnostic, not final-test model selection.
 
 ## Production loop
 
 - **Versioned model:** MLflow tracks and registers `fiberguard-fault-classifier` version 1.
 - **Inference service:** FastAPI exposes `GET /health` and `POST /predict`, returning state, confidence, review decision, model version, and latency.
-- **Historical replay:** a deterministic held-out sample exercises the production inference path without implying a live data feed. Measured in-process replay latency was approximately 0.27 ms p50 and 0.76 ms p95.
+- **Historical replay:** a deterministic held-out sample exercises the production inference path without implying a live data feed. Measured in-process replay latency was 0.306 ms p50 and 4.682 ms p95 in the [recorded 4,560-row run](artifacts/historical_replay.json). These local, in-process timings exclude HTTP overhead and are run-specific.
 - **Drift monitoring:** PSI compares replay telemetry with training-lightpath reference bins. Representative publisher test data genuinely differs from training; this is a benchmark distribution shift, not a production incident. LP-power PSI was 2.724334, while a controlled +2.0 dBm injection raised it to 9.777087 using the same 0.20 warning threshold.
 - **Operator interface:** `GET /` explains model health, current telemetry, likely fault, confidence, review routing, latency, drift, and model version in one view.
 
-The supporting results are committed as compact artifacts, including the data audit, entity-safe split manifest, baseline metrics, calibration metrics, feature ablation, production manifest, and drift validation.
-
-## Design decisions and non-goals
-
-- **No deep learning:** conventional models already performed strongly, so extra complexity was not justified.
-- **No Kafka or Kubernetes:** bounded historical replay is sufficient to demonstrate this benchmark V1's consumption loop.
-- **No live-carrier claim:** the interface is an operational simulation over published historical data.
-- **No complexity for a vanity score:** the goal is a defensible 99.70% held-out result, not chasing 99.9% with an unnecessary model stack.
+PSI evidence: [drift validation](artifacts/drift_validation.json). The supporting results are committed as compact artifacts, including the data audit, entity-safe split manifest, baseline metrics, calibration metrics, feature ablation, production manifest, and drift validation.
 
 ## Reproduce
 
@@ -80,7 +69,7 @@ Place the two publisher files under `data/raw/Optical network soft failure datas
 # Install
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
+pip install -e ".[test]"
 
 # Rebuild audits, evaluation, and registered model only when needed
 PYTHONPATH=src python3 scripts/audit_data.py
@@ -94,5 +83,7 @@ PYTHONPATH=src python3 scripts/replay_telemetry.py
 PYTHONPATH=src python3 scripts/validate_drift.py
 PYTHONPATH=src python3 -m unittest discover -s tests
 ```
+
+Raw data, the MLflow database, and model binaries are not committed. Regenerate the registry with `productionize.py` before serving; the public manifest alone is not a runnable model. Its local paths resolve from the repository root.
 
 Open `http://127.0.0.1:8000/` for the operator view. All reported final-test metrics remain held-out evaluation only.

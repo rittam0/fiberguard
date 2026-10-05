@@ -64,6 +64,20 @@ class DataLoaderTests(unittest.TestCase):
         result = abstention_metrics(y, probabilities, threshold)
         self.assertGreaterEqual(result["confident_accuracy"], 0.0)
 
+    def test_split_overlap_rejected(self):
+        with self.assertRaisesRegex(ValueError, "overlap"):
+            assert_disjoint({"train": [0], "validation": [0], "final_test": [1]}, 2)
+
+    def test_raw_review_boundary_and_error_accounting(self):
+        import numpy as np
+        y = np.array([0, 1, 2])
+        p = np.array([[0.99, 0.01, 0, 0], [0.6, 0.4, 0, 0], [0, 0, 1, 0]])
+        result = abstention_metrics(y, p, 0.99)
+        self.assertEqual(result["review_count"], 1)
+        self.assertEqual(result["wrong_predictions_flagged"], 1)
+        self.assertEqual(result["remaining_wrong_confident_predictions"], 0)
+        self.assertEqual(result["confident_accuracy"], 1)
+
     def test_production_artifacts_replay_drift_and_operator_view(self):
         import json
         ROOT = Path(__file__).resolve().parents[1]

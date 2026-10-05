@@ -45,7 +45,7 @@ def build_psi_reference(x_train, feature_names, bins=10):
 
 
 def main() -> None:
-    tracking_uri = f"sqlite:///{MLFLOW_DB.resolve()}"
+    tracking_uri = f"sqlite:///{MLFLOW_DB.resolve().as_posix()}"
     mlflow.set_tracking_uri(tracking_uri)
     client = mlflow.MlflowClient()
     experiment = client.get_experiment_by_name("FiberGuard production model")
@@ -127,10 +127,10 @@ def main() -> None:
         "model_name": MODEL_NAME,
         "model_version": version,
         "run_id": run_id,
-        "mlflow_tracking_uri": tracking_uri,
+        "mlflow_tracking_path": MLFLOW_DB.relative_to(ROOT).as_posix(),
         "registered_model_uri": f"models:/{MODEL_NAME}/{version}",
         "model_artifact_uri": artifact_uri,
-        "local_model_artifact": str(local_artifact),
+        "local_model_artifact": local_artifact.relative_to(ROOT).as_posix(),
         "features": FEATURES,
         "raw_review_threshold": threshold,
         "review_threshold_source": "C2 validation rows, raw XGBoost maximum probabilities only",

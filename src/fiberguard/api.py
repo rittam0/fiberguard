@@ -89,7 +89,10 @@ def drift_from_replay(reference: dict, replay_path: Path = REPLAY_PATH) -> dict:
 class InferenceEngine:
     def __init__(self, manifest_path: Path = MANIFEST_PATH):
         self.manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        mlflow.set_tracking_uri(self.manifest["mlflow_tracking_uri"])
+        tracking_path = self.manifest.get("mlflow_tracking_path")
+        tracking_uri = (f"sqlite:///{(ROOT / tracking_path).resolve().as_posix()}"
+                        if tracking_path else self.manifest["mlflow_tracking_uri"])
+        mlflow.set_tracking_uri(tracking_uri)
         self.model = mlflow.xgboost.load_model(self.manifest["registered_model_uri"])
         self.threshold = float(self.manifest["raw_review_threshold"])
         self.version = str(self.manifest["model_version"])
